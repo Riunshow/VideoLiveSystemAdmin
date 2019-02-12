@@ -1,11 +1,11 @@
 <template>
-  <div id="home">
+  <div id="home" v-loading="loading">
     <div class="app-header">
       <div class="title">后台管理系统</div>
       <div class="welcome">欢迎你,
         <el-dropdown @command="logout">
           <span class="el-dropdown-link">
-              {{user_name}}<i class="el-icon-arrow-down el-icon--right"></i>
+              {{userData.nickname}}<i class="el-icon-arrow-down el-icon--right"></i>
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>退出</el-dropdown-item>
@@ -43,26 +43,24 @@
     },
     data() {
       return {
-        user_name: '',
+        userData: {},
+        loading: false,
       }
     },
     mounted() {
-      // vuex
-      // this.user_name = this.$store.state.loginUser.name
-      // sessionStorage
-      this.user_name = sessionStorage.user_name
+      this.userData = JSON.parse(sessionStorage.getItem('user'))
     },
     methods: {
-      logout() {
-        const _this = this
-        this.$axios.get('/user/logout')
-          .then(() => {
-            sessionStorage.clear();
-            location.reload()
-            this.$router.push({
-              path: '/login'
-            });
-          })
+      async logout() {
+        this.loading = true
+        const result = await this.$request('/api/user/logout', 'GET', {})
+        if (result.success) {
+          sessionStorage.clear()
+          this.$router.push({
+            path: '/login'
+          });
+        }
+        this.loading = false
       },
       // tab切换时，动态的切换路由
       tabClick(tab) {

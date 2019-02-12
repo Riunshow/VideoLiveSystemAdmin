@@ -1,10 +1,10 @@
 <template>
-	<div class="login-container">
+	<div class="login-container" v-loading="loading">
 		<div class="login-bg">
 			<div class="login-box clear">
 				<div class="aside fl">
 					<h3 class="title">
-						<p>图书后台管理系统</p>
+						<p>后台管理系统</p>
 					</h3>
 				</div>
 				<div class="content fl">
@@ -44,6 +44,7 @@
 				user_pwd: "",
 				isShowPwd: false,
 				loginTipMsg: "",
+				loading: false,
 			};
 		},
 		methods: {
@@ -52,14 +53,17 @@
 			},
 			// 登录
 			async btnLogin() {
+				this.loading = true
 				this.checkEmailAndPwd(this.user_num, this.user_pwd)
-				const data = await this.$request('/api/user/login', 'POST', {
+				const result = await this.$request('/api/user/login', 'POST', {
 					useraccount: this.user_num,
 					password: this.user_pwd
 				})
-				if (data.success) {
+				if (result.success) {
+					sessionStorage.setItem('user', JSON.stringify(result.data.user))
 					this.$router.push('/index')
 				}
+				this.loading = false
 			},
 			// 输入验证
 			checkEmailAndPwd(email, pwd) {

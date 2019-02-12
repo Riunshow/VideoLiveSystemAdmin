@@ -1,7 +1,12 @@
 <!-- 左侧菜单导航栏组件 -->
 <template>
   <div class="app-nav-wrap">
-    <el-menu :default-active="$route.path" class="el-menu-vertical-demo" router>
+    <el-menu 
+      :default-active="$route.path" 
+      class="el-menu-vertical-demo" 
+      router
+      background-color="#eff2f7"
+    >
       <el-menu-item v-for="menu in menus" :index="menu.route" :key="menu.route">
         <i class="el-icon-menu" /> {{menu.name}}
       </el-menu-item>

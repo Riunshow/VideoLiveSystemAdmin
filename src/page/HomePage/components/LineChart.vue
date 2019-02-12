@@ -18,7 +18,7 @@ export default {
     },
     height: {
       type: String,
-      default: '350px'
+      default: '400px'
     },
     autoResize: {
       type: Boolean,
@@ -74,21 +74,26 @@ export default {
         this.__resizeHandler()
       }
     },
-    setOptions({ expectedData, actualData } = {}) {
+    setOptions({ visitData, liveData } = {}) {
       this.chart.setOption({
         xAxis: {
           data: this.chartData.timeData,
           boundaryGap: false,
           axisTick: {
             show: false
+          },
+          axisLabel: {
+            interval: 0,
+            // rotate: -30
           }
         },
         grid: {
-          left: 10,
-          right: 10,
-          bottom: 20,
-          top: 30,
-          containLabel: true
+          y2: 30
+          // left: 10,
+          // right: 10,
+          // bottom: 20,
+          // top: 30,
+          // containLabel: true
         },
         tooltip: {
           trigger: 'axis',
@@ -103,7 +108,7 @@ export default {
           }
         },
         legend: {
-          data: ['日访问人数', '当前直播人数']
+          data: ['日访问人数', '直播人数']
         },
         series: [{
           name: '日访问人数', 
@@ -118,12 +123,12 @@ export default {
           },
           smooth: true,
           type: 'line',
-          data: expectedData,
+          data: visitData,
           animationDuration: 2800,
           animationEasing: 'cubicInOut'
         },
         {
-          name: '当前直播人数',
+          name: '直播人数',
           itemStyle: {
             normal: {
               color: '#3888fa',
@@ -138,7 +143,7 @@ export default {
           },
           smooth: true,
           type: 'line',
-          data: actualData,
+          data: liveData,
           animationDuration: 2800,
           animationEasing: 'quadraticOut'
         }]

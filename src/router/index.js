@@ -99,6 +99,7 @@ const router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
+
   if (to.meta.requireAuth) {
     if (sessionStorage.length === 0) {
       next({
@@ -108,7 +109,7 @@ router.beforeEach((to, from, next) => {
       next()
     }
     if (to.meta.adminAuth) {
-      if (sessionStorage.user_role == 3) {
+      if (JSON.parse(sessionStorage.user).role == 2) {
         next()
       } else {
         next({

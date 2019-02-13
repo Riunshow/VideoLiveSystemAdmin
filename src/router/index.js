@@ -9,9 +9,10 @@ import FirstPage from '@/page/HomePage/FirstPage'
 import Home from '@/page/Home'
 import Template from '@/page/Template'
 
-import UserManage from '@/page/System/UserManage'
+import UserManage from '@/page/User/UserManage'
+import UserInfo from '@/page/User/UserInfo'
+
 import UserGroupManage from '@/page/System/UserGroupManage'
-import UserInfo from '@/page/System/UserInfo'
 import Personal from '@/page/System/PersonalCenter'
 import Question from '@/page/Question'
 

@@ -13,6 +13,9 @@ import VCharts from 'v-charts'
 import store from '@/store/index';
 Vue.config.productionTip = false;
 
+import { directive } from 'namedavatar/src/vue'
+Vue.directive('avatar', directive);
+
 import request from './utils/request'
 
 Vue.prototype.$request = request

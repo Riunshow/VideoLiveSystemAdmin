@@ -84,11 +84,11 @@ export default {
           },
           axisLabel: {
             interval: 0,
-            // rotate: -30
+            rotate: -30
           }
         },
         grid: {
-          y2: 30
+          y2: 80
           // left: 10,
           // right: 10,
           // bottom: 20,
@@ -108,10 +108,10 @@ export default {
           }
         },
         legend: {
-          data: ['日访问人数', '直播人数']
+          data: ['访问人数', '直播人数']
         },
         series: [{
-          name: '日访问人数', 
+          name: '访问人数', 
           itemStyle: {
             normal: {
               color: '#FF005A',

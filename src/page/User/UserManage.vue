@@ -38,13 +38,6 @@
     <div class="search-place">
       <el-input placeholder="请输入要搜索用户名" v-model="inputSearch" clearable></el-input>
       <el-button class="searchBtn" @click="searchUser">搜索</el-button>
-      <!-- 导入excel -->
-      <el-button class="uploadExcel searchBtn" @click="addClick">
-        导入 excel
-        <input ref="importExcel" class="uploadInput" type="file" @change="importExcel(this)" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"></input>
-      </el-button>
-      <!-- 导出到 excel -->
-      <el-button type="primary" @click="exportExcel" class="searchBtn">导出到 Excel</el-button>
       <el-button type="success" @click="resetAll" class="searchBtn">重置</el-button>
       <!-- <el-select v-model="selectSearch" placeholder="分类筛选" filterable @change='getSearchRole' class="selectRole">
                 <el-option  v-for="item in options" :key="item.value" :label="item.label" :value="item.value" ></el-option>
@@ -84,35 +77,37 @@
 </template>
 
 <script>
-  import FileSaver from 'file-saver'
-  import XLSX from 'xlsx'
   export default {
+    // -1为封禁用户,0为普通用户,1为主播,2为管理员
     data() {
       return {
         inputSearch: '',
         selectSearch: '',
         options: [{
-          value: '-1',
-          label: '全部',
+          value: -1,
+          label: '封禁用户',
         }, {
-          value: '3',
-          label: '系统管理员',
-        }, {
-          value: '2',
-          label: '图书管理员',
-        }, {
-          value: '1',
+          value: 0,
           label: '普通用户',
+        }, {
+          value: 1,
+          label: '主播',
+        }, {
+          value: 2,
+          label: '管理员',
         }],
         changeRoleoptions: [{
-          value: '3',
-          label: '系统管理员',
+          value: -1,
+          label: '封禁用户',
         }, {
-          value: '2',
-          label: '图书管理员',
-        }, {
-          value: '1',
+          value: 0,
           label: '普通用户',
+        }, {
+          value: 1,
+          label: '主播',
+        }, {
+          value: 2,
+          label: '管理员',
         }],
         dialogTableVisible: false,
         dialogFormVisible: false,
@@ -136,7 +131,7 @@
           },
           {
             label: '用户名',
-            prop: 'account'
+            prop: 'useraccount'
           },
           {
             label: '姓名',
@@ -161,53 +156,77 @@
     },
     mounted() {},
     methods: {
-      getAllUser() {
-        this.$axios.get('/admin/user/-1')
-          .then(results => {
-            this.count = results.data.count
-            for (const key of results.data.rows) {
-              if (key.role == 3) {
-                key.rolename = '系统管理员'
-              } else if (key.role == 2) {
-                key.rolename = '图书管理员'
-              } else if (key.role == 1) {
-                key.rolename = '普通用户'
-              }
-            }
-            this.tableData = results.data.rows
-            this.nowTableData = this.tableData.rows
-            this.loading = false
-          })
+      // 重置
+      resetAll() {
+        this.inputSearch = ''
+        this.selectSearch = ''
+        this.getAllUser()
       },
+      // 获取所有用户信息
+      async getAllUser() {
+        const result = await this.$request('/api/admin/userList')
+        if (result.success) {
+          for (const key of result.data) {
+            switch (key.role) {
+              case -1:
+                key.rolename = '封禁用户'              
+                break;
+              case 0:
+                key.rolename = '普通用户'              
+                break;
+              case 1:
+                key.rolename = '主播'              
+                break;
+              case 2:
+                key.rolename = '管理员'              
+                break;
+              default:
+                break;
+            }
+          }
+          this.count = result.count
+          this.tableData = result.data
+          this.loading = false
+        }
+      },
+      // 跳转到用户详情页
       getUserInfo(row) {
-        this.$store.commit('save_detail_userInfo', row);
         this.$router.push({
           path: `userinfo/${row.id}`
         })
       },
       // 分页
-      handleCurrentChange(val) {
+      async handleCurrentChange(val) {
         this.currentPageSave = val
         if (val == 0) {
           val += 1
         }
-        this.$axios
-          .get('/admin/user/-1?offset=' + (val - 1))
-          .then((results) => {
-            for (const key of results.data.rows) {
-              if (key.role == 3) {
-                key.rolename = '系统管理员'
-              } else if (key.role == 2) {
-                key.rolename = '图书管理员'
-              } else if (key.role == 1) {
-                key.rolename = '普通用户'
-              }
+        const result = await this.$request('/api/admin/userList?offset=' + (val - 1))
+        if (result.success) {
+          for (const key of result.data) {
+            switch (key.role) {
+              case -1:
+                key.rolename = '封禁用户'              
+                break;
+              case 0:
+                key.rolename = '普通用户'              
+                break;
+              case 1:
+                key.rolename = '主播'              
+                break;
+              case 2:
+                key.rolename = '管理员'              
+                break;
+              default:
+                break;
             }
-            this.tableData = results.data.rows
-            this.nowTableData = this.tableData.rows
-          })
-
+          }
+          this.tableData = result.data
+          this.nowTableData = this.tableData
+        }
       },
+
+      // -----------------------------------------
       clickChangeRole(row) {
         this.newRow = row
       },
@@ -242,91 +261,6 @@
             this.$message.error('修改出现问题,请联系管理员')
           })
 
-        }
-      },
-      exportExcel() {
-        /* generate workbook object from table */
-        var wb = XLSX.utils.table_to_book(document.querySelector('#out-table'))
-        /* get binary string as output */
-        var wbout = XLSX.write(wb, {
-          bookType: 'xlsx',
-          bookSST: true,
-          type: 'array'
-        })
-        try {
-          FileSaver.saveAs(new Blob([wbout], {
-            type: 'application/octet-stream'
-          }), 'user-manage.xlsx')
-        } catch (e) {
-          if (typeof console !== 'undefined') console.log(e, wbout)
-        }
-        return wbout
-      },
-      // 导入 excel
-      importExcel(obj) {
-        const _this = this
-        let inputDOM = this.$refs.inputer;
-        // 通过DOM取文件数据
-        this.file = event.currentTarget.files[0];
-        var rABS = false; //是否将文件读取为二进制字符串
-        var f = this.file;
-        var reader = new FileReader();
-        //if (!FileReader.prototype.readAsBinaryString) {
-        FileReader.prototype.readAsBinaryString = function (f) {
-          var binary = "";
-          var rABS = false; //是否将文件读取为二进制字符串
-          var pt = this;
-          var wb; //读取完成的数据
-          var outdata;
-          var reader = new FileReader();
-          reader.onload = function (e) {
-            var bytes = new Uint8Array(reader.result);
-            var length = bytes.byteLength;
-            for (var i = 0; i < length; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            var XLSX = require('xlsx');
-            if (rABS) {
-              wb = XLSX.read(btoa(fixdata(binary)), { //手动转化
-                type: 'base64'
-              });
-            } else {
-              wb = XLSX.read(binary, {
-                type: 'binary'
-              });
-            }
-            outdata = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); //outdata就是你想要的东西
-            _this.da = [...outdata]
-            let arr = []
-            _this.da.map(v => {
-              let obj = {}
-              obj.account = v.account
-              obj.nickname = v.nickname
-              obj.avatar = v.avatar
-              obj.signature = v.signature
-              obj.password = v.password
-              arr.push(obj)
-            })
-            _this.$axios.post('/admin/register', {
-              userList: arr
-            }).then((res) => {
-              _this.$message({
-                message: '请耐心等待导入成功',
-                type: 'success'
-              });
-              _this.$refs.importExcel.value = null;
-              _this.getAllUser()
-              _this.handleCurrentChange(_this.currentPageSave)
-            }).catch((erro) => {
-              _this.$message.error('错了哦，这是一条错误消息');
-            })
-          }
-          reader.readAsArrayBuffer(f);
-        }
-        if (rABS) {
-          reader.readAsArrayBuffer(f);
-        } else {
-          reader.readAsBinaryString(f);
         }
       },
       addClick() {
@@ -373,11 +307,6 @@
           .catch((err) => {
             this.$message.error('搜索失败')
           })
-      },
-      resetAll() {
-        this.inputSearch = ''
-        this.selectSearch = ''
-        this.getAllUser()
       },
     }
   };

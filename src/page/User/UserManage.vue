@@ -31,28 +31,34 @@
     margin-top: 20px;
     margin-bottom: -50px;
 }
+.op-tag {
+  margin-left: 10px;
+}
 </style>
 <!-- 用户管理组件 -->
 <template>
   <div class="user-wrap">
     <div class="search-place">
-      <el-input placeholder="请输入要搜索用户名" v-model="inputSearch" clearable></el-input>
-      <el-button class="searchBtn" @click="searchUser">搜索</el-button>
+      <el-input placeholder="请输入要搜索用户名或昵称" v-model="inputSearch" clearable></el-input>
+      <el-button class="searchBtn" @click="searchUser()">搜索</el-button>
       <el-button type="success" @click="resetAll" class="searchBtn">重置</el-button>
-      <!-- <el-select v-model="selectSearch" placeholder="分类筛选" filterable @change='getSearchRole' class="selectRole">
-                <el-option  v-for="item in options" :key="item.value" :label="item.label" :value="item.value" ></el-option>
-            </el-select> -->
+      <el-select v-model="selectSearch" placeholder="身份筛选" filterable :clearable="true" @change="getSearchRole" class="selectRole">
+        <el-option  v-for="item in options" :key="item.value" :label="item.label" :value="item.value" ></el-option>
+      </el-select>
     </div>
     <el-table :data="tableData" id="out-table" v-loading="loading">
       <template v-for="column in tableColumns">
-        <el-table-column :label="column.label" :prop="column.prop">
+        <el-table-column :width="column.label == 'id' ? 80 : ''" align="center" :label="column.label" :prop="column.prop">
         </el-table-column>
       </template>
       <el-table-column label="操作" prop="">
         <template slot-scope="scope">
-          <!-- 详细信息 -->
+          <!-- 详细信息 - 修改权限 -->
           <el-button type="text" @click="getUserInfo(scope.row)">详细信息</el-button>
-          <el-button type="text" @click="clickChangeRole(scope.row), dialogFormVisible = true" class="options">修改权限</el-button>
+          <el-tag class="op-tag" type="info" v-if="loginId == scope.row.id">自己</el-tag>
+          <el-button type="text" v-if="loginId !== scope.row.id" @click="clickChangeRole(scope.row), dialogFormVisible = true" class="options">修改权限</el-button>
+          <el-button type="text" v-if="loginId !== scope.row.id" @click="delUserInfo(scope.row)">删除</el-button>
+
           <el-dialog title="权限管理" :visible.sync="dialogFormVisible">
             <el-form :model="form">
               <el-form-item label="权限选择" :label-width="formLabelWidth">
@@ -87,26 +93,26 @@
           value: -1,
           label: '封禁用户',
         }, {
-          value: 0,
+          value: 1,
           label: '普通用户',
         }, {
-          value: 1,
+          value: 2,
           label: '主播',
         }, {
-          value: 2,
+          value: 3,
           label: '管理员',
         }],
         changeRoleoptions: [{
           value: -1,
           label: '封禁用户',
         }, {
-          value: 0,
+          value: 1,
           label: '普通用户',
         }, {
-          value: 1,
+          value: 2,
           label: '主播',
         }, {
-          value: 2,
+          value: 3,
           label: '管理员',
         }],
         dialogTableVisible: false,
@@ -124,7 +130,6 @@
         newRow: {},
         formLabelWidth: '120px',
         tableData: [],
-        nowTableData: [],
         tableColumns: [{
             label: 'id',
             prop: 'id'
@@ -149,41 +154,50 @@
         loading: true,
         count: 0,
         currentPageSave: 0,
+        dataListStatus: 0, // 0 默认全部list, 1 按权限分类list，2 昵称搜索 list
+        loginId: 0,
       };
     },
-    created() {
-      this.getAllUser()
+    async created() {
+      await this.getAllUser()
+      this.loginId = JSON.parse(sessionStorage.user).id
     },
     mounted() {},
     methods: {
       // 重置
-      resetAll() {
+      async resetAll() {
         this.inputSearch = ''
-        this.selectSearch = ''
-        this.getAllUser()
+        this.dataListStatus = 0
+        await this.getAllUser()
+      },
+      // role -> rolename
+      changeRole2Name(result) {
+        for (const key of result.data) {
+          switch (key.role) {
+            case -1:
+              key.rolename = '封禁用户'              
+              break;
+            case 1:
+              key.rolename = '普通用户'              
+              break;
+            case 2:
+              key.rolename = '主播'              
+              break;
+            case 3:
+              key.rolename = '管理员'              
+              break;
+            default:
+              break;
+          }
+        }
       },
       // 获取所有用户信息
-      async getAllUser() {
-        const result = await this.$request('/api/admin/userList')
+      async getAllUser(val = 1) {
+        this.dataListStatus = 0
+        this.tableData = []
+        const result = await this.$request('/api/admin/userList?offset=' + (val - 1))
         if (result.success) {
-          for (const key of result.data) {
-            switch (key.role) {
-              case -1:
-                key.rolename = '封禁用户'              
-                break;
-              case 0:
-                key.rolename = '普通用户'              
-                break;
-              case 1:
-                key.rolename = '主播'              
-                break;
-              case 2:
-                key.rolename = '管理员'              
-                break;
-              default:
-                break;
-            }
-          }
+          this.changeRole2Name(result)
           this.count = result.count
           this.tableData = result.data
           this.loading = false
@@ -195,118 +209,118 @@
           path: `userinfo/${row.id}`
         })
       },
+      // 获取所选权限
+      async getSearchRole(value) {
+        this.searchRole = value
+
+        this.searchRole ? await this.getSearchRoleData() : await this.getAllUser()
+      },
+      // 根据所选权限获取用户信息
+      async getSearchRoleData(val = 1) {
+        this.dataListStatus = 1
+        this.tableData = []
+        this.loading = true
+        const result = await this.$request(`/api/admin/userByRole?offset=${val - 1}`, 'POST', {
+          userRole: this.searchRole
+        })
+        if (result.success) {
+          this.changeRole2Name(result)
+          this.count = result.count
+          this.tableData = result.data
+          this.loading = false
+        }
+      },
+      // 点击获取当前行信息
+      clickChangeRole(row) {
+        this.newRow = row
+      },
+      // 获取选择的权限
+      getChangeRole(value) {
+        this.selectRole = value;
+      },
+      // 修改权限
+      async changeRole() {
+        if (this.form.region == '') {
+          this.$message.error('修改失败,所选内容不能为空')
+        }else {
+          this.dialogFormVisible = false;
+          const result = await this.$request('/api/admin/changeUserRole', 'PUT', {
+            userID: this.newRow.id,
+            role: this.selectRole
+          })
+          if (result.success) {
+            this.$message.success('修改成功')
+            switch (this.selectRole) {
+               case -1:
+                this.newRow.rolename = '封禁用户'              
+                break;
+              case 1:
+                this.newRow.rolename = '普通用户'              
+                break;
+              case 2:
+                this.newRow.rolename = '主播'              
+                break;
+              case 3:
+                this.newRow.rolename = '管理员'              
+                break;
+              default:
+                break;
+            }
+          }
+
+        }
+      },
+      // 昵称或手机号 模糊搜索
+      async searchUser(val = 1) { 
+        if (this.inputSearch == '') {
+          this.$message.error('请输入要搜索的用户名')
+          return;
+        }
+        this.dataListStatus = 2
+        let options = {}
+        this.tableData = []
+        this.loading = true     
+
+        const result = await this.$request(`/api/admin/userByNickname?offset=${val - 1}`, 'POST', {
+          nickname: this.inputSearch,
+          useraccount: this.inputSearch
+        })
+        if (result.success) {
+          this.$message.success('搜索成功')
+          this.changeRole2Name(result)    
+          this.count = result.count
+          this.tableData = result.data
+          this.loading = false      
+        }
+      },
+      // 删除某一用户
+      async delUserInfo(row) {
+        const result = await this.$request('/api/admin/deleteUserById', 'DELETE', {
+          userId: row.id
+        })
+        if (result.success) {
+          await this.getAllUser()
+        }
+      },
       // 分页
       async handleCurrentChange(val) {
         this.currentPageSave = val
         if (val == 0) {
           val += 1
         }
-        const result = await this.$request('/api/admin/userList?offset=' + (val - 1))
-        if (result.success) {
-          for (const key of result.data) {
-            switch (key.role) {
-              case -1:
-                key.rolename = '封禁用户'              
-                break;
-              case 0:
-                key.rolename = '普通用户'              
-                break;
-              case 1:
-                key.rolename = '主播'              
-                break;
-              case 2:
-                key.rolename = '管理员'              
-                break;
-              default:
-                break;
-            }
-          }
-          this.tableData = result.data
-          this.nowTableData = this.tableData
+        switch (this.dataListStatus) {
+          case 0:
+            await this.getAllUser(val)
+            break;
+          case 1:
+            await this.getSearchRoleData(val)
+            break;
+          case 2:
+            await this.searchUser(val)
+            break;
+          default:
+            break;
         }
-      },
-
-      // -----------------------------------------
-      clickChangeRole(row) {
-        this.newRow = row
-      },
-      getChangeRole(value) {
-        this.selectRole = value;
-      },
-      changeRole() {
-        this.dialogFormVisible = false;
-        if (this.form.region == '') {
-          this.$message.error('修改失败,所选内容不能为空')
-
-        } else if (this.form.region == '全部') {
-          this.$message.error('修改失败')
-
-        } else {
-          this.$axios.put('/admin/' + this.newRow.id, {
-            role: this.selectRole
-          }).then((result) => {
-            if (result.data[0] == 1) {
-              this.$message('修改成功')
-              if (this.selectRole == 3) {
-                this.newRow.rolename = '系统管理员'
-              } else if (this.selectRole == 2) {
-                this.newRow.rolename = '图书管理员'
-              } else if (this.selectRole == 1) {
-                this.newRow.rolename = '普通用户'
-              }
-            } else {
-              this.$message('修改失败,请刷新重试')
-            }
-          }).catch((err) => {
-            this.$message.error('修改出现问题,请联系管理员')
-          })
-
-        }
-      },
-      addClick() {
-        const addInput = document.querySelector('.uploadInput')
-        addInput.click();
-      },
-      getSearchRole(value) {
-        this.searchRole = value
-        this.tableData = []
-        if (value == -1) {
-          this.tableData = this.nowTableData
-        } else {
-          for (const iter of this.nowTableData) {
-            if (iter.role == this.searchRole) {
-              this.tableData.push(iter)
-            }
-          }
-        }
-      },
-      searchUser() {
-        let options = {}
-        this.tableData = []
-
-        if (this.inputSearch == '' && this.selectSearch == '') {
-          this.$message.error('请输入要搜索的用户名')
-          return;
-        }
-        this.$axios.get('/admin/search?name=' + this.inputSearch)
-          .then((results) => {
-            for (const key of results.data.rows) {
-              if (key.role == 3) {
-                key.rolename = '系统管理员'
-              } else if (key.role == 2) {
-                key.rolename = '图书管理员'
-              } else if (key.role == 1) {
-                key.rolename = '普通用户'
-              }
-            }
-            this.tableData = results.data.rows
-            this.count = results.data.count
-
-            this.$message('搜索成功')
-          })
-          .catch((err) => {
-            this.$message.error('搜索失败')
-          })
       },
     }
   };

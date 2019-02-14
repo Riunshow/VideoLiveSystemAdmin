@@ -75,18 +75,17 @@
 					}
 				}
 			},
-			updateUserInfo() {
-				// this.dialogFormVisible = false
-				// const _this = this
-				// if (this.userForm.avatar == null || this.userForm.nickname == null) {
-				// 	_this.$message.error('不能为空')
-				// } else {
-				// 	axios.put('/user/info/' + this.userId, _this.userForm)
-				// 		.then(results => {
-				// 			_this.userData[0].avatar = _this.userForm.avatar
-				// 			_this.userData[0].nickname = _this.userForm.nickname
-				// 		})
-				// }
+			async updateUserInfo() {
+				if (this.userForm.nickname == null) {
+					this.$message.error('昵称不能为空')
+					return
+				} 
+				this.dialogFormVisible = false
+				const result = this.$request('/api/admin/updateUserById', 'PUT', {
+					userId: this.userId,
+					nickname: this.userForm.avatar,
+					avatar: this.userForm.nickname
+				})
 
 			},
 		},

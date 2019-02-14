@@ -110,7 +110,7 @@ router.beforeEach((to, from, next) => {
       next()
     }
     if (to.meta.adminAuth) {
-      if (JSON.parse(sessionStorage.user).role == 2) {
+      if (JSON.parse(sessionStorage.user).role == 3) {
         next()
       } else {
         next({

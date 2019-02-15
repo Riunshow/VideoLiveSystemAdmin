@@ -12,9 +12,9 @@ import Template from '@/page/Template'
 import UserManage from '@/page/User/UserManage'
 import UserInfo from '@/page/User/UserInfo'
 
-import UserGroupManage from '@/page/System/UserGroupManage'
+import LiveGroup from '@/page/Live/LiveGroup'
+
 import Personal from '@/page/System/PersonalCenter'
-import Question from '@/page/Question'
 
 Vue.use(Router)
 
@@ -49,29 +49,20 @@ const router = new Router({
           },
         },
         {
-          path: 'question',
-          name: '用户反馈管理',
-          component: Question,
-          meta: {
-            requireAuth: true,
-            adminAuth: true
-          },
-        },
-        {
-          path: 'usergroup',
-          name: '用户分组管理',
-          component: UserGroupManage,
-          meta: {
-            requireAuth: true,
-            adminAuth: true
-          },
-        },
-        {
           path: 'userinfo/:userid',
-          name: '用户详情页',
+          name: '用户信息详情',
           component: UserInfo,
           meta: {
             requireAuth: true
+          },
+        },
+        {
+          path: 'livegroup',
+          name: '直播间分组管理',
+          component: LiveGroup,
+          meta: {
+            requireAuth: true,
+            adminAuth: true
           },
         },
         {

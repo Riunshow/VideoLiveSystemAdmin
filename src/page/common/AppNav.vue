@@ -7,8 +7,8 @@
       router
       background-color="#eff2f7"
     >
-      <el-menu-item v-for="menu in menus" :index="menu.route" :key="menu.route">
-        <i class="el-icon-menu" /> {{menu.name}}
+      <el-menu-item class="menu-item" v-for="menu in menus" :index="menu.route" :key="menu.route">
+        <i :class="menu.icon" /> {{menu.name}}
       </el-menu-item>
     </el-menu>
   </div>
@@ -20,18 +20,22 @@
     data() {
       return {
         menus: [{
+            icon: 'el-icon-location',
             route: '/index',
             name: '首页'
           },
           {
+            icon: 'el-icon-menu',
             route: '/usermanage',
             name: '用户管理',
           },
           {
-            route: '/question',
-            name: '用户反馈管理',
+            icon: 'el-icon-menu',
+            route: '/livegroup',
+            name: '直播间分组管理',
           },
           {
+            icon: 'el-icon-info',
             route: '/personal',
             name: '个人中心'
           }
@@ -70,3 +74,13 @@
     }
   }
 </script>
+<style lang="scss" scoped>
+.menu-item {
+  display: flex;
+  align-items: center;
+
+  i {
+    margin-right: 10px;
+  }
+}
+</style>

@@ -49,24 +49,24 @@
         this.$store.commit('add_tabs', {
           route: '/index',
           name: '首页'
-        });
+        })
         this.$store.commit('add_tabs', {
           route: this.$route.path,
           name: this.$route.name
-        });
-        this.$store.commit('set_active_index', this.$route.path);
+        })
+        this.$store.commit('set_active_index', this.$route.path)
       } else {
         this.$store.commit('add_tabs', {
           route: '/index',
           name: '首页'
-        });
-        this.$store.commit('set_active_index', '/index');
-        this.$router.push('/index');
+        })
+        this.$store.commit('set_active_index', '/index')
+        this.$router.push('/index')
       }
     },
     computed: {
       options() {
-        return this.$store.state.options;
+        return this.$store.state.options
       }
     },
     methods: {

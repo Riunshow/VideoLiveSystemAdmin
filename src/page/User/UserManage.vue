@@ -55,7 +55,7 @@
         <template slot-scope="scope">
           <!-- 详细信息 - 修改权限 -->
           <el-button type="text" @click="getUserInfo(scope.row)">详细信息</el-button>
-          <el-tag class="op-tag" type="info" v-if="loginId == scope.row.id">自己</el-tag>
+          <el-tag class="op-tag" type="success" v-if="loginId == scope.row.id">自己</el-tag>
           <el-button type="text" v-if="loginId !== scope.row.id" @click="clickChangeRole(scope.row), dialogFormVisible = true" class="options">修改权限</el-button>
           <el-button type="text" v-if="loginId !== scope.row.id" @click="delUserInfo(scope.row)">删除</el-button>
 
@@ -192,10 +192,10 @@
         }
       },
       // 获取所有用户信息
-      async getAllUser(val = 1) {
+      async getAllUser(page = 1) {
         this.dataListStatus = 0
         this.tableData = []
-        const result = await this.$request('/api/admin/userList?offset=' + (val - 1))
+        const result = await this.$request('/api/admin/userList?offset=' + (page - 1))
         if (result.success) {
           this.changeRole2Name(result)
           this.count = result.count
@@ -205,6 +205,7 @@
       },
       // 跳转到用户详情页
       getUserInfo(row) {
+        this.$store.commit('save_detail_userInfo', row)
         this.$router.push({
           path: `userinfo/${row.id}`
         })
@@ -216,11 +217,11 @@
         this.searchRole ? await this.getSearchRoleData() : await this.getAllUser()
       },
       // 根据所选权限获取用户信息
-      async getSearchRoleData(val = 1) {
+      async getSearchRoleData(page = 1) {
         this.dataListStatus = 1
         this.tableData = []
         this.loading = true
-        const result = await this.$request(`/api/admin/userByRole?offset=${val - 1}`, 'POST', {
+        const result = await this.$request(`/api/admin/userByRole?offset=${page - 1}`, 'POST', {
           userRole: this.searchRole
         })
         if (result.success) {

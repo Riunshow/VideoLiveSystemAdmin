@@ -11,17 +11,21 @@ const store = new Vuex.Store({
   state: {
     options: [],
     activeIndex: '/user',
-    bookInfo: {},
     userInfo: {},
-    // loginUser: {
-    //     role: 0,
-    //     name: '',
-    // }
+    liveGroupInfo: {},
   },
   mutations: {
+    resetState(state) {
+      this.state.options = []
+      this.state.activeIndex = '/user'
+      this.state.userInfo = {}
+      this.state.liveGroupInfo = {}
+    },
     // 添加tabs
     add_tabs(state, data) {
-      this.state.options.push(data);
+      if (data.route !== '/login') {
+        this.state.options.push(data)
+      }
     },
     // 删除tabs
     delete_tabs(state, route) {
@@ -42,9 +46,9 @@ const store = new Vuex.Store({
     save_detail_userInfo(state, info) {
       this.state.userInfo = info;
     },
-    // 设置图书详情信息
-    save_detail_bookInfo(state, info) {
-      this.state.bookInfo = info;
+    // 设置直播分类详情信息
+    save_detail_liveGroupInfo(state, info) {
+      this.state.liveGroupInfo = info;
     }
   }
 });

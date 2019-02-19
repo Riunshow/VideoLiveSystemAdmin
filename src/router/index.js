@@ -13,6 +13,7 @@ import UserManage from '@/page/User/UserManage'
 import UserInfo from '@/page/User/UserInfo'
 
 import LiveGroup from '@/page/Live/LiveGroup'
+import LiveGroupInfo from '@/page/Live/LiveGroupInfo'
 
 import Personal from '@/page/System/PersonalCenter'
 
@@ -53,13 +54,23 @@ const router = new Router({
           name: '用户信息详情',
           component: UserInfo,
           meta: {
-            requireAuth: true
+            requireAuth: true,
+            adminAuth: true
           },
         },
         {
           path: 'livegroup',
-          name: '直播间分组管理',
+          name: '直播分组管理',
           component: LiveGroup,
+          meta: {
+            requireAuth: true,
+            adminAuth: true
+          },
+        },
+        {
+          path: 'liveGroupInfo/:live_group_id',
+          name: '直播分组信息详情',
+          component: LiveGroupInfo,
           meta: {
             requireAuth: true,
             adminAuth: true

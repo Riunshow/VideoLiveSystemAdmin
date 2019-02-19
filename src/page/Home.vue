@@ -61,6 +61,7 @@
           });
         }
         this.loading = false
+        this.$store.commit('resetState')
       },
       // tab切换时，动态的切换路由
       tabClick(tab) {
@@ -68,6 +69,9 @@
         // 用户详情页的时候，对应了二级路由，需要拼接添加第二级路由
         if (this.activeIndex === '/userinfo') {
           path = this.activeIndex + '/' + this.$store.state.userInfo.id;
+        }
+        if (this.activeIndex === '/liveGroupInfo') {
+          path = this.activeIndex + '/' + this.$store.state.liveGroupInfo.liveGroupId;
         }
         this.$router.push({
           path: path

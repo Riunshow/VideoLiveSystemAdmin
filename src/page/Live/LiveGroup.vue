@@ -48,7 +48,7 @@
       <el-table-column label="操作" prop="">
         <template slot-scope="scope">
           <!-- 详细信息 - 修改权限 -->
-          <el-button type="text">详细信息</el-button>
+          <el-button type="text" @click="getLiveGroupInfo(scope.row)">详细信息</el-button>
           <el-button type="text">删除</el-button>
         </template>
       </el-table-column>
@@ -83,7 +83,7 @@ export default {
 					prop: 'groupName'
 				},
 				{
-					label: '分组下人数',
+					label: '直播间数量',
 					prop: 'peopleCount'
 				}
 			],
@@ -109,6 +109,7 @@ export default {
 			this.loading = true
 			const result = await this.$request('/api/admin/getLiveGroupList?offset=' + (page - 1))
 			if (result.success) {
+				result.data.map(x => x.peopleCount = x.lives.length)
 				this.tableData = result.data
 				this.loading = false
 			}
@@ -120,7 +121,7 @@ export default {
 				groupAvatar: this.groupForm.groupAvatar
 			})
 			if (result.success) {
-				this.$messgae(result.msg)
+				this.$message(result.msg)
 				this.dialogFormVisible = false
 				this.groupForm = {
 					groupAvatar: '',
@@ -133,6 +134,13 @@ export default {
 			this.groupForm.groupAvatar = imgUrl
 			this.canClick = true
 		},
+		// 获取信息
+		getLiveGroupInfo(row) {
+			this.$store.commit('save_detail_liveGroupInfo', row)
+			this.$router.push({
+				path: `liveGroupInfo/${row.liveGroupId}`
+			})
+		}
 	}
 }
 </script>

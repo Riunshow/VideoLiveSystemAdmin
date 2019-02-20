@@ -172,7 +172,7 @@
       display: flex;
       flex-flow: row;
       .app-nav {
-        flex: 0 0 250px;
+        flex: 0 0 200px;
         background: #eff2f7;
       }
       .app-wrap {
@@ -185,6 +185,7 @@
           border: 1px solid #d1dbe5;
           border-top: none;
           padding: 0 20px;
+          min-height: 75%;
           padding-bottom: 80px;
         }
       }

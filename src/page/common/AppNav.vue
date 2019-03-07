@@ -35,6 +35,11 @@
             name: '直播间分组管理',
           },
           {
+            icon: 'el-icon-menu',
+            route: '/gift',
+            name: '礼物管理',
+          },
+          {
             icon: 'el-icon-info',
             route: '/personal',
             name: '个人中心'

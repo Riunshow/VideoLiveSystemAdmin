@@ -47,6 +47,8 @@
 				loading: false,
 			};
 		},
+		created () {
+		},
 		methods: {
 			showPassword() {
 				this.isShowPwd = !this.isShowPwd;

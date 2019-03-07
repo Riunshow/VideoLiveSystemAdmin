@@ -17,6 +17,8 @@ import LiveGroupInfo from '@/page/Live/LiveGroupInfo'
 
 import Personal from '@/page/System/PersonalCenter'
 
+import Gift from '@/page/Gift/Gift'
+
 Vue.use(Router)
 
 const router = new Router({
@@ -30,14 +32,16 @@ const router = new Router({
       name: '主页',
       component: Home,
       meta: {
-        requireAuth: true
+        requireAuth: true,
+        adminAuth: true
       },
       children: [{
           path: 'index',
           name: '首页',
           component: FirstPage,
           meta: {
-            requireAuth: true
+            requireAuth: true,
+            adminAuth: true
           },
         },
         {
@@ -77,11 +81,21 @@ const router = new Router({
           },
         },
         {
+          path: 'gift',
+          name: '礼物管理',
+          component: Gift,
+          meta: {
+            requireAuth: true,
+            adminAuth: true
+          },
+        },
+        {
           path: 'personal',
           name: '个人中心',
           component: Personal,
           meta: {
-            requireAuth: true
+            requireAuth: true,
+            adminAuth: true
           },
         },
       ]
@@ -102,7 +116,6 @@ const router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
-
   if (to.meta.requireAuth) {
     if (sessionStorage.length === 0) {
       next({
@@ -116,7 +129,7 @@ router.beforeEach((to, from, next) => {
         next()
       } else {
         next({
-          path: '/index'
+          path: '/403'
         })
       }
     }

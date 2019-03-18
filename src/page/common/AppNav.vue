@@ -40,6 +40,11 @@
             name: '礼物管理',
           },
           {
+            icon: 'el-icon-menu',
+            route: '/application',
+            name: '主播申请管理',
+          },
+          {
             icon: 'el-icon-info',
             route: '/personal',
             name: '个人中心'

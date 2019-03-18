@@ -19,6 +19,8 @@ import Personal from '@/page/System/PersonalCenter'
 
 import Gift from '@/page/Gift/Gift'
 
+import Application from '@/page/Application/Application'
+
 Vue.use(Router)
 
 const router = new Router({
@@ -84,6 +86,15 @@ const router = new Router({
           path: 'gift',
           name: '礼物管理',
           component: Gift,
+          meta: {
+            requireAuth: true,
+            adminAuth: true
+          },
+        },
+        {
+          path: 'application',
+          name: '主播申请管理',
+          component: Application,
           meta: {
             requireAuth: true,
             adminAuth: true

@@ -176,16 +176,16 @@
         background: #eff2f7;
       }
       .app-wrap {
+        max-height: 90%;
         flex: 1;
         padding: 10px 20px;
-        overflow: auto;
         min-width: 950px;
         .content-wrap {
-          min-height: 75%;
+          height: 90%;
+          overflow: scroll;
           border: 1px solid #d1dbe5;
           border-top: none;
           padding: 0 20px;
-          min-height: 75%;
           padding-bottom: 80px;
         }
       }

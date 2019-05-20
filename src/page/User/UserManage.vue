@@ -1,5 +1,5 @@
 <style scoped>
-  .search-place {
+.search-place {
     height:50px;
 }
 .el-input {
